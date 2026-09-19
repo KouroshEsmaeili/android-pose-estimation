@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:fitsSystemWindows="true"
+  tools:context=".MainActivity">
+
+  <androidx.camera.view.PreviewView
+    android:id="@+id/preview_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:importantForAccessibility="no"
+    app:implementationMode="compatible"
+    app:scaleType="fillCenter" />
+
+  <io.github.kouroshesmaeili.poseestimation.PoseOverlayView
+    android:id="@+id/pose_overlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:importantForAccessibility="no" />
+
+  <TextView
+    android:id="@+id/status_chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top|center_horizontal"
+    android:layout_marginTop="16dp"
+    android:background="@drawable/status_chip_background"
+    android:paddingHorizontal="14dp"
+    android:paddingVertical="8dp"
+    android:text="@string/status_initializing"
+    android:textColor="@color/text_primary"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    android:visibility="gone" />
+
+  <LinearLayout
+    android:id="@+id/message_panel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginHorizontal="32dp"
+    android:background="@drawable/message_panel_background"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+      android:id="@+id/message_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:textColor="@color/text_primary"
+      android:textSize="22sp"
+      android:textStyle="bold"
+      tools:text="Camera access needed" />
+
+    <TextView
+      android:id="@+id/message_body"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:gravity="center"
+      android:lineSpacingExtra="2dp"
+      android:textColor="@color/text_secondary"
+      android:textSize="15sp"
+      tools:text="Camera frames are processed on this device and are never stored or transmitted." />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/action_button"
+      style="@style/Widget.Material3.Button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:minHeight="48dp"
+      android:text="@string/action_allow_camera"
+      app:cornerRadius="16dp" />
+
+  </LinearLayout>
+
+</FrameLayout>

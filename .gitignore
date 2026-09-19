@@ -1,0 +1,28 @@
+# Android Studio and local SDK configuration
+/.idea/
+*.iml
+/local.properties
+
+# Gradle and build output
+/.gradle/
+**/build/
+
+# Native build output
+.cxx/
+.externalNativeBuild/
+
+# Android tooling output
+/captures/
+*.apk
+*.aab
+
+# Signing material must never be committed
+*.jks
+*.keystore
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Private local project brief
+/foryou.txt

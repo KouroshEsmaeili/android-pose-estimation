@@ -1,0 +1,14 @@
+<resources>
+  <style name="Theme.AndroidPoseEstimation.Base" parent="Theme.Material3.DayNight.NoActionBar">
+    <item name="colorPrimary">@color/pose_accent</item>
+    <item name="colorOnPrimary">@color/camera_background</item>
+    <item name="android:colorAccent">@color/pose_accent</item>
+    <item name="android:fontFamily">sans</item>
+    <item name="android:navigationBarColor">@color/camera_background</item>
+    <item name="android:statusBarColor">@color/camera_background</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowBackground">@color/camera_background</item>
+  </style>
+
+  <style name="Theme.AndroidPoseEstimation" parent="Theme.AndroidPoseEstimation.Base" />
+</resources>

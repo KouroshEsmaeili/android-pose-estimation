@@ -1,0 +1,21 @@
+<resources>
+  <string name="app_name">Android Pose Estimation</string>
+
+  <string name="permission_title">Camera access needed</string>
+  <string name="permission_body">Camera frames are processed on this device for pose estimation. They are never stored or transmitted.</string>
+  <string name="permission_settings_title">Enable camera access</string>
+  <string name="permission_settings_body">Camera permission is disabled for this app. Open system settings to enable it.</string>
+  <string name="action_allow_camera">Allow camera</string>
+  <string name="action_open_settings">Open settings</string>
+  <string name="action_retry">Retry</string>
+
+  <string name="status_initializing">Initializing camera</string>
+  <string name="status_no_pose">Position one person in the frame</string>
+  <string name="status_tracking">Estimating pose on device</string>
+  <string name="status_detection_error">Pose estimation interrupted</string>
+
+  <string name="camera_unavailable_title">Front camera unavailable</string>
+  <string name="camera_unavailable_body">This application requires a front-facing camera.</string>
+  <string name="camera_error_title">Unable to start the camera</string>
+  <string name="camera_error_body">Close other camera applications and try again.</string>
+</resources>
