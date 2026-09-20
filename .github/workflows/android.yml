@@ -2,8 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [master, main]
+    branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -34,7 +35,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Verify project
-        run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease --stacktrace
+        run: ./gradlew clean testDebugUnitTest lintDebug assembleDebug assembleRelease --stacktrace
 
       - name: Upload lint report
         if: always()

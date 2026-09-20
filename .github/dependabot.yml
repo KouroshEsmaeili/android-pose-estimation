@@ -5,9 +5,23 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    groups:
+      android-libraries:
+        patterns:
+          - "androidx.*"
+          - "com.google.android.material:*"
+          - "com.google.mlkit:*"
+      android-build-toolchain:
+        patterns:
+          - "com.android.application"
+          - "gradle-wrapper"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"

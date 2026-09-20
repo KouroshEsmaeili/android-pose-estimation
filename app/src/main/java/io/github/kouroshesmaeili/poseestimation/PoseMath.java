@@ -9,9 +9,14 @@ public final class PoseMath {
     }
 
     /**
-     * Returns the angle ABC in degrees, or {@link Double#NaN} when either arm has zero length.
+     * Returns the angle ABC in degrees, or {@link Double#NaN} for invalid input or a zero-length
+     * arm.
      */
     public static double angleDegrees(Vector3 pointA, Vector3 vertexB, Vector3 pointC) {
+        if (!isFinite(pointA) || !isFinite(vertexB) || !isFinite(pointC)) {
+            return Double.NaN;
+        }
+
         double abX = pointA.x - vertexB.x;
         double abY = pointA.y - vertexB.y;
         double abZ = pointA.z - vertexB.z;
@@ -19,15 +24,30 @@ public final class PoseMath {
         double cbY = pointC.y - vertexB.y;
         double cbZ = pointC.z - vertexB.z;
 
-        double abNorm = Math.sqrt(abX * abX + abY * abY + abZ * abZ);
-        double cbNorm = Math.sqrt(cbX * cbX + cbY * cbY + cbZ * cbZ);
-        if (abNorm < MIN_VECTOR_NORM || cbNorm < MIN_VECTOR_NORM) {
+        double abNorm = Math.hypot(Math.hypot(abX, abY), abZ);
+        double cbNorm = Math.hypot(Math.hypot(cbX, cbY), cbZ);
+        if (!Double.isFinite(abNorm)
+                || !Double.isFinite(cbNorm)
+                || abNorm < MIN_VECTOR_NORM
+                || cbNorm < MIN_VECTOR_NORM) {
             return Double.NaN;
         }
 
-        double cosine = (abX * cbX + abY * cbY + abZ * cbZ) / (abNorm * cbNorm);
+        double cosine = (abX / abNorm) * (cbX / cbNorm)
+                + (abY / abNorm) * (cbY / cbNorm)
+                + (abZ / abNorm) * (cbZ / cbNorm);
+        if (!Double.isFinite(cosine)) {
+            return Double.NaN;
+        }
+
         double clampedCosine = Math.max(-1.0, Math.min(1.0, cosine));
         return Math.toDegrees(Math.acos(clampedCosine));
+    }
+
+    private static boolean isFinite(Vector3 vector) {
+        return Double.isFinite(vector.x)
+                && Double.isFinite(vector.y)
+                && Double.isFinite(vector.z);
     }
 
     /** Immutable point or vector in ML Kit's relative 3D coordinate space. */

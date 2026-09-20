@@ -1,121 +1,152 @@
 # Android Human Pose Estimation
 
+An Android application that estimates a person’s pose from the front camera, draws a
+confidence-filtered skeleton over the preview, and displays left and right elbow angles.
+Camera frames are processed locally through CameraX and ML Kit’s bundled pose detector; the
+application requests no network permission and does not store images.
+
+This repository implements the Android camera and lifecycle integration, preview-aligned
+rendering, confidence handling, UI states, and joint-angle geometry. The underlying pose model
+is provided by Google ML Kit and was not trained by the repository author.
+
 [![Android CI](https://github.com/KouroshEsmaeili/android-pose-estimation/actions/workflows/android.yml/badge.svg)](https://github.com/KouroshEsmaeili/android-pose-estimation/actions/workflows/android.yml)
 [![API](https://img.shields.io/badge/API-24%2B-3DDC84.svg)](https://android-arsenal.com/api?level=24)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-A focused Android application that estimates a single person’s body pose from the front camera, renders a body skeleton over the preview, and reports left and right elbow angles. Camera frames are processed locally with CameraX and ML Kit; the application has no network permission and does not store images.
+## Processing pipeline
 
-## What this project demonstrates
-
-- Lifecycle-aware front-camera capture with CameraX
-- On-device human pose landmark estimation with ML Kit
-- Preview-aligned landmark rendering without manual rotation or scaling constants
-- Confidence-aware skeleton visualization
-- Relative 3D joint-angle calculation with numerical edge-case handling
-- Runtime permission, unavailable-camera, and inference-error states
-- Unit-tested geometry and automated Android build checks
-
-This is a deployment and application-integration project. It does not train or own the underlying pose model.
-
-## Processing flow
-
-```text
-Front camera
-    │
-    ▼
-CameraX ImageAnalysis (keep latest frame)
-    │
-    ▼
-ML Kit Pose Detector (stream mode, bundled model)
-    │
-    ├── 33 body landmarks + in-frame likelihood
-    └── relative depth coordinates
-    │
-    ▼
-CameraX view-coordinate transform
-    │
-    ▼
-Confidence-filtered skeleton + elbow angles
+```mermaid
+flowchart LR
+    A[Front camera] --> B[LifecycleCameraController]
+    B --> C["ImageAnalysis<br/>KEEP_ONLY_LATEST"]
+    C --> D["MlKitAnalyzer + bundled PoseDetector<br/>STREAM_MODE"]
+    D --> E["View-referenced pose result<br/>up to 33 landmarks"]
+    E --> F["Application processing"]
+    F --> G["PoseOverlayView<br/>confidence-filtered skeleton"]
+    F --> H["PoseMath<br/>relative 3D elbow angles"]
 ```
 
-`LifecycleCameraController` and `MlKitAnalyzer` handle frame ownership, backpressure, device rotation, front-camera mirroring, and conversion into `PreviewView` coordinates. The custom overlay only renders the transformed results.
+`LifecycleCameraController` owns lifecycle-aware capture and preview. `MlKitAnalyzer` passes
+frames to the bundled detector and requests `PreviewView` coordinates from CameraX, so the
+custom overlay does not need rotation, front-camera mirroring, or scaling constants.
 
-## Technology
+## Key features
 
-| Component | Version | Purpose |
-| --- | --- | --- |
-| Android Gradle Plugin | 8.13.2 | Android build tooling |
-| Gradle | 8.13 | Reproducible wrapper build |
-| CameraX | 1.5.3 | Preview, lifecycle, and image analysis |
-| ML Kit Pose Detection | 18.0.0-beta5 | Bundled on-device pose model |
-| Java | 17 | Application source language |
+- Lifecycle-aware front-camera preview and image analysis with latest-frame backpressure
+- Bundled ML Kit pose inference in stream mode, with no model download at runtime
+- CameraX view-coordinate integration for preview-aligned landmark rendering
+- In-frame likelihood filtering for skeleton segments, joints, and angle labels
+- Relative 3D elbow-angle calculation with degenerate and non-finite input handling
+- Clear permission, unavailable-camera, initialization, and inference-error states
+- Local processing with no image storage and no network permission
+- Unit tests, Android lint, debug packaging, and minified release packaging in CI
 
-The ML Kit Pose Detection API is still beta. Its API and model behavior may change between releases.
+## Architecture
 
-## Requirements
+| Layer | Responsibility |
+| --- | --- |
+| `MainActivity` | Owns camera permission state, the CameraX controller, detector, analysis executor, lifecycle binding, error states, and teardown. |
+| ML Kit `PoseDetector` | Supplies the bundled third-party model and returns a pose containing up to 33 landmarks. |
+| `PoseOverlayView` | Filters low-confidence landmarks and draws the body skeleton and elbow labels in preview coordinates. |
+| `PoseMath` | Computes angles from relative 3D landmark coordinates as a pure Java geometry utility. |
 
-- JDK 17
-- Android SDK 36 with Build Tools 36.0.0
-- Android Studio with support for Android Gradle Plugin 8.13
-- Android device running API 24 or newer
-- Front-facing camera
+## Technical details
 
-A physical device is recommended. An emulator can launch the application but may not provide representative camera or inference behavior.
+| Component | Version or setting |
+| --- | --- |
+| Language | Java 17 |
+| Minimum Android version | API 24 |
+| Compile / target SDK | 36 / 36 |
+| Android Gradle Plugin | 8.13.2 |
+| Gradle wrapper | 8.13 |
+| CameraX | 1.5.3 |
+| ML Kit Pose Detection | 18.0.0-beta5 |
+
+ML Kit Pose Detection remains a beta API. The application uses its base bundled SDK rather than
+the accurate variant or a remotely downloaded model.
 
 ## Build and run
 
-1. Clone the repository.
-2. Open the repository root in Android Studio.
-3. Allow Gradle sync to finish and install Android SDK 36 if prompted.
-4. Connect a compatible device.
-5. Run the `app` configuration and grant camera permission.
+Requirements:
 
-Command-line verification:
+- JDK 17
+- Android SDK 36 and Build Tools 36.0.0
+- Android Studio compatible with Android Gradle Plugin 8.13
+- An Android device running API 24 or newer with a front-facing camera
+
+Clone and open the repository in Android Studio:
 
 ```bash
-./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
+git clone https://github.com/KouroshEsmaeili/android-pose-estimation.git
+cd android-pose-estimation
+```
+
+Allow Gradle sync to finish, connect a device, run the `app` configuration, and grant
+camera permission. A physical device is recommended because an emulator may not provide
+representative camera input.
+
+Run the complete local verification suite on macOS or Linux:
+
+```bash
+./gradlew clean testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
 
 On Windows:
 
 ```powershell
-gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease
+.\gradlew.bat clean testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
+
+## Validation
+
+### Automated validation
+
+GitHub Actions validates the Gradle wrapper, configures JDK 17, and runs the unit tests, Android
+lint, debug build, and minified/resource-shrunk release build. The unit tests cover right,
+straight, and depth-axis angles along with zero-length, non-finite, and large-coordinate cases.
+
+### Physical-device validation
+
+The project owner has run the application successfully on a physical Android phone and observed
+the application launch, front-camera pose estimation, and overlay functionality working. This
+was a focused functional check on one device, not a broad compatibility, orientation, or
+performance test.
+
+## Privacy
+
+- Camera access is the only runtime permission.
+- The pose model is bundled with the application and inference occurs on the device.
+- Frames and pose results remain in memory and are not written to storage.
+- The merged application manifest contains neither `INTERNET` nor `ACCESS_NETWORK_STATE`.
+- Android application backup and device-transfer extraction are disabled.
+
+These statements describe the repository’s implementation; they are not a general privacy or
+security certification.
+
+## Limitations
+
+- ML Kit tracks the most prominent person; this application does not support multi-person poses.
+- The application requires a front-facing camera.
+- Only major body landmarks are rendered, although the detector can return 33 landmarks.
+- Landmark Z values represent relative image-space depth, not metric 3D reconstruction, and are
+  less reliable than X/Y coordinates.
+- Elbow angles inherit uncertainty from landmark visibility and pose-estimation quality.
+- ML Kit Pose Detection is a beta dependency and may introduce breaking changes.
+- No accuracy, robustness, latency, frame-rate, battery, or broad device-compatibility claims are
+  made.
+- Pose classification and activity recognition are outside the project’s scope.
 
 ## Project structure
 
 ```text
 app/src/main/java/io/github/kouroshesmaeili/poseestimation/
-├── MainActivity.java       # Permission and lifecycle-aware camera setup
+├── MainActivity.java       # Camera permission, lifecycle, analysis, and teardown
 ├── PoseOverlayView.java    # Confidence filtering and preview rendering
-└── PoseMath.java           # Pure 3D angle geometry
+└── PoseMath.java           # Pure relative-3D angle geometry
 
 app/src/test/
-└── PoseMathTest.java       # Geometry edge cases
+└── PoseMathTest.java       # Geometry and numerical edge cases
 ```
-
-## Privacy
-
-- Camera access is the only runtime permission.
-- Frames are processed in memory on the device.
-- Images and pose results are not written to storage.
-- The final merged manifest removes optional network permissions contributed by ML Kit.
-- Application backup is disabled.
-
-## Limitations
-
-- ML Kit returns the most prominent person; multi-person estimation is not supported.
-- A visible face and sufficient full-body context generally improve detection.
-- Landmarks below the configured in-frame likelihood threshold are not rendered.
-- The Z coordinate is relative depth in image units, not metric 3D reconstruction.
-- Elbow angles inherit uncertainty from the estimated landmarks.
-- The repository makes no accuracy, latency, frame-rate, or robustness claims.
-- Pose classification and activity recognition are outside the current scope.
-
-## Validation scope
-
-Automated checks validate compilation, Android lint, debug and minified release packaging, and the pure geometry layer. Camera behavior, overlay alignment, and device performance still require testing on physical hardware across portrait and landscape orientations.
 
 ## License
 

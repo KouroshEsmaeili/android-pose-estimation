@@ -275,17 +275,20 @@ public final class MainActivity extends AppCompatActivity {
         cameraRunning = false;
         cameraInitializationStarted = false;
 
-        if (cameraController != null) {
-            cameraController.clearImageAnalysisAnalyzer();
+        LifecycleCameraController controllerToRelease = cameraController;
+        cameraController = null;
+        if (controllerToRelease != null) {
+            controllerToRelease.clearImageAnalysisAnalyzer();
+            controllerToRelease.unbind();
             if (binding != null) {
                 binding.previewView.setController(null);
             }
-            cameraController = null;
         }
 
-        if (poseDetector != null) {
-            poseDetector.close();
-            poseDetector = null;
+        PoseDetector detectorToClose = poseDetector;
+        poseDetector = null;
+        if (detectorToClose != null) {
+            detectorToClose.close();
         }
     }
 

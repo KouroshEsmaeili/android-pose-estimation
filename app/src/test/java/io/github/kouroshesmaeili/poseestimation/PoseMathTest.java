@@ -50,6 +50,34 @@ public final class PoseMathTest {
         assertTrue(Double.isNaN(angle));
     }
 
+    @Test
+    public void angleDegrees_returnsNaNForNonFiniteCoordinate() {
+        double angleWithNaN = PoseMath.angleDegrees(
+                point(Double.NaN, 0.0, 0.0),
+                point(0.0, 0.0, 0.0),
+                point(0.0, 1.0, 0.0)
+        );
+        double angleWithInfinity = PoseMath.angleDegrees(
+                point(Double.POSITIVE_INFINITY, 0.0, 0.0),
+                point(0.0, 0.0, 0.0),
+                point(0.0, 1.0, 0.0)
+        );
+
+        assertTrue(Double.isNaN(angleWithNaN));
+        assertTrue(Double.isNaN(angleWithInfinity));
+    }
+
+    @Test
+    public void angleDegrees_avoidsOverflowForLargeFiniteCoordinates() {
+        double angle = PoseMath.angleDegrees(
+                point(1.0e300, 0.0, 0.0),
+                point(0.0, 0.0, 0.0),
+                point(0.0, 1.0e300, 0.0)
+        );
+
+        assertEquals(90.0, angle, TOLERANCE);
+    }
+
     private static PoseMath.Vector3 point(double x, double y, double z) {
         return new PoseMath.Vector3(x, y, z);
     }

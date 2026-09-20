@@ -19,10 +19,11 @@
 # Signing material must never be committed
 *.jks
 *.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
 
 # Operating-system files
 .DS_Store
 Thumbs.db
-
-# Private local project brief
-/foryou.txt
